@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>IndexedDB Student Example</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+            /* Hide scrollbars but maintain scrolling functionality */
+            html {
+                scrollbar-width: none; /* Firefox */
+                -ms-overflow-style: none; /* IE and Edge */
+            }
+            
+            html::-webkit-scrollbar {
+                display: none; /* Chrome, Safari, and Opera */
+            }
+            
+            :root {
+                --primary: #6a11cb;
+                --secondary: #2575fc;
+                --accent: #ff9671;
+                --light: #f8f9fa;
+                --dark: #343a40;
+            }
+            
+            body {
+                font-family: 'Poppins', sans-serif;
+                line-height: 1.5;
+                margin: 0;
+                padding: 15px;
+                background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+                color: var(--dark);
+                min-height: 100vh;
+                overflow-y: auto; /* Ensure scrolling works with hidden scrollbars */
+            }
+            
+            h2, h3 {
+                color: var(--primary);
+                margin-bottom: 15px;
+                padding-bottom: 8px;
+                font-weight: 600;
+                position: relative;
+                font-size: 1.4rem;
+            }
+            
+            h2::after, h3::after {
+                content: '';
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                height: 3px;
+                width: 60px;
+                background: linear-gradient(90deg, var(--primary), var(--secondary));
+                border-radius: 10px;
+            }
+            
+            #frm {
+                background: white;
+                padding: 15px;
+                border-radius: 12px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+                margin-bottom: 20px;
+                max-width: 450px;
+                transform: translateZ(0);
+                transition: transform 0.3s;
+            }
+            
+            #frm:hover {
+                transform: translateY(-3px);
+            }
+            
+            input[type="text"] {
+                width: 100%;
+                padding: 8px 12px;
+                margin: 5px 0;
+                border: none;
+                background-color: #f0f2f5;
+                border-radius: 8px;
+                font-size: 14px;
+                transition: all 0.2s;
+                box-sizing: border-box;
+            }
+            
+            input[type="text"]:focus {
+                background-color: #e8f0fe;
+                outline: none;
+                box-shadow: 0 0 0 2px rgba(106, 17, 203, 0.3);
+            }
+            
+            button {
+                background: linear-gradient(45deg, var(--primary), var(--secondary));
+                color: white;
+                padding: 9px 15px;
+                border: none;
+                border-radius: 8px;
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 600;
+                transition: all 0.3s;
+                box-shadow: 0 4px 6px rgba(106, 17, 203, 0.2);
+            }
+            
+            button:hover {
+                box-shadow: 0 6px 10px rgba(106, 17, 203, 0.3);
+                transform: translateY(-2px);
+            }
+            
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 15px;
+                background: white;
+                border-radius: 12px;
+                overflow: hidden;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+                font-size: 14px;
+            }
+            
+            th, td {
+                padding: 10px 12px;
+                text-align: left;
+            }
+            
+            tbody tr {
+                border-bottom: 1px solid #eee;
+            }
+            
+            tbody tr:last-child {
+                border-bottom: none;
+            }
+            
+            thead tr, table tr:first-child {
+                background: linear-gradient(45deg, var(--primary), var(--secondary));
+                color: white;
+                font-weight: 500;
+                font-size: 14px;
+                letter-spacing: 0.5px;
+            }
+            
+            tbody tr:hover {
+                background-color: rgba(106, 17, 203, 0.05);
+            }
+            
+            .container {
+                max-width: 850px;
+                margin: 0 auto;
+                padding: 15px;
+                position: relative;
+            }
+            
+            .container::before {
+                content: '';
+                position: absolute;
+                top: -10px;
+                right: -10px;
+                width: 70px;
+                height: 70px;
+                border-radius: 50%;
+                background: linear-gradient(45deg, var(--accent), transparent);
+                opacity: 0.6;
+                z-index: -1;
+            }
+            
+            /* Form table specific styles */
+            #frm table {
+                box-shadow: none;
+                margin: 0;
+                background: transparent;
+            }
+            
+            #frm td {
+                padding: 5px 8px;
+                vertical-align: middle;
+            }
+            
+            #frm tr {
+                border: none;
+            }
+            
+            @media screen and (max-width: 600px) {
+                .container {
+                    padding: 10px;
+                }
+                
+                table {
+                    font-size: 13px;
+                }
+                
+                th, td {
+                    padding: 8px;
+                }
+                
+                input[type="text"], button {
+                    width: 100%;
+                    padding: 8px 10px;
+                }
+                
+                h2, h3 {
+                    font-size: 1.2rem;
+                }
+            }
+        </style>
+        <script>
+            let db;
+            let request = indexedDB.open("StudentDB", 1);
+            request.onupgradeneeded = function(event) {
+                db = event.target.result;
+                let objectStore = db.createObjectStore("Students", { keyPath: "id" });
+                objectStore.createIndex("Name", "Name", { unique: false });
+                objectStore.createIndex("Marks", "Marks", { unique: false });
+            };
+
+            request.onsuccess = function(event) {
+                db = event.target.result;
+                displayData();
+            };
+
+            request.onerror = function(event) {
+                console.log("Error opening database:", event.target.errorCode);
+            };
+
+            function Insert() {
+                let id = document.getElementById("tbID").value;
+                let Name = document.getElementById("tbName").value;
+                let Marks = document.getElementById("tbMarks").value;   
+
+                let transaction = db.transaction(["Students"], "readwrite");
+                let objectStore = transaction.objectStore("Students");
+                let req = objectStore.add({ id: id, Name: Name, Marks: Marks });
+                
+                req.onsuccess = function() {
+                    console.log("Data inserted Successfully");
+                    displayData();
+                };
+
+                req.onerror = function() {
+                    console.log("Error adding data");
+                };
+            }
+
+            function displayData() {
+                let table = document.getElementById("tb1Grid");
+                table.innerHTML = `
+                    <tr style="background-color:black; color:white; font-size:18px;">
+                        <td>ID</td>
+                        <td>Name</td>
+                        <td>Marks</td>
+                    </tr>
+                `;
+                let transaction = db.transaction(["Students"], "readonly");
+                let objectStore = transaction.objectStore("Students");
+
+                objectStore.openCursor().onsuccess = function(event) {
+                    let cursor = event.target.result;
+                    if (cursor) {
+                        let row = `
+                            <tr>
+                                <td>${cursor.value.id}</td>
+                                <td>${cursor.value.Name}</td>
+                                <td>${cursor.value.Marks}</td>
+                            </tr>
+                        `;
+                        table.innerHTML += row;
+                        cursor.continue();
+                    }
+                };              
+            }
+        </script>
+    </head>
+    <body>
+        <div class="container">
+            <h2>Student Database</h2>
+            <form id="frm">
+                <table>
+                    <tr>
+                        <td>ID:</td>
+                        <td><input type="text" id="tbID" placeholder="Enter ID" /></td>
+                    </tr>
+                    <tr>
+                        <td>Name:</td>
+                        <td><input type="text" id="tbName" placeholder="Enter name" /></td>
+                    </tr>
+                    <tr>
+                        <td>Marks:</td>
+                        <td><input type="text" id="tbMarks" placeholder="Enter marks" /></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                            <button type="button" onclick="Insert()">Add Student</button>
+                        </td>
+                    </tr>
+                </table>
+            </form>
+            
+            <h3>Student Records</h3>
+            <table id="tb1Grid" cellpadding="5" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Data will be inserted here -->
+                </tbody>
+            </table>
+        </div>
+    </body>
+</html>
