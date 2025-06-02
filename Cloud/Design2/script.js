@@ -95,3 +95,41 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 });
+
+// Copy code to clipboard for code-blocks
+function copyCode(btn) {
+    const codeBlock = btn.parentElement.querySelector('pre code');
+    let text = codeBlock.innerText || codeBlock.textContent;
+    // Remove leading/trailing whitespace
+    text = text.replace(/^\s+|\s+$/g, '');
+    // Copy to clipboard
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(function() {
+            btn.textContent = 'Copied!';
+            setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+        }, function() {
+            fallbackCopyTextToClipboard(text, btn);
+        });
+    } else {
+        fallbackCopyTextToClipboard(text, btn);
+    }
+}
+
+function fallbackCopyTextToClipboard(text, btn) {
+    const textarea = document.createElement('textarea');
+    textarea.value = text;
+    textarea.setAttribute('readonly', '');
+    textarea.style.position = 'absolute';
+    textarea.style.left = '-9999px';
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+        document.execCommand('copy');
+        btn.textContent = 'Copied!';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    } catch (err) {
+        btn.textContent = 'Failed';
+        setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
+    }
+    document.body.removeChild(textarea);
+}

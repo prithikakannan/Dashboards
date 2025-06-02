@@ -703,6 +703,67 @@
                             </li>
                         </ol>
 
+                        <h3>IBM Watson Speech-to-Text (STT) Python Example:</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-python">import json
+from ibm_watson import SpeechToTextV1
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+
+# IAM credentials
+apikey = 'YOUR_SPEECH_TO_TEXT_API_KEY'
+url = 'YOUR_SPEECH_TO_TEXT_URL'
+
+# Authentication
+authenticator = IAMAuthenticator(apikey)
+speech_to_text = SpeechToTextV1(authenticator=authenticator)
+speech_to_text.set_service_url(url)
+
+# Open audio file
+with open('audio.wav', 'rb') as audio_file:
+    result = speech_to_text.recognize(
+        audio=audio_file,
+        content_type='audio/wav',
+        model='en-US_BroadbandModel',
+        continuous=True
+    ).get_result()
+
+# Output transcript
+text_output = result['results'][0]['alternatives'][0]['transcript']
+print("Transcription:", text_output)
+</code></pre>
+    </div>
+
+    <h3>IBM Watson Text-to-Speech (TTS) Python Example:</h3>
+    <div class="code-block">
+        <button class="copy-btn" onclick="copyCode(this)">Copy</button>
+        <pre><code class="language-python">from ibm_watson import TextToSpeechV1
+from ibm_cloud_sdk_core.authenticators import IAMAuthenticator
+
+# IAM credentials
+apikey = 'YOUR_TEXT_TO_SPEECH_API_KEY'
+url = 'YOUR_TEXT_TO_SPEECH_URL'
+
+# Authentication
+authenticator = IAMAuthenticator(apikey)
+text_to_speech = TextToSpeechV1(authenticator=authenticator)
+text_to_speech.set_service_url(url)
+
+# Synthesize speech
+response = text_to_speech.synthesize(
+    text='Hello, this is IBM Watson speaking!',
+    voice='en-US_AllisonV3Voice',
+    accept='audio/mp3'
+).get_result()
+
+# Save audio
+with open('output.mp3', 'wb') as audio_file:
+    audio_file.write(response.content)
+
+print("Audio saved as output.mp3")
+</code></pre>
+    </div>
+
                         <h3>Output Result:</h3>
                         <p>Successfully implemented cloud-based TTS with the following metrics:</p>
                         <table class="result-table">
