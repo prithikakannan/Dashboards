@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>You're Invited!</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        /* Background and Layout */
+        body {
+            margin: 0;
+            font-family: 'Poppins', sans-serif;
+            background: #f5f7fa;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 15px;
+        }
+
+        .invitation-card {
+            background: #ffffff;
+            padding: 25px 20px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 360px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .invitation-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 12px;
+            font-size: 22px;
+            font-weight: 500;
+        }
+
+        .event-details {
+            margin-bottom: 15px;
+            font-size: 14px;
+            color: #555;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .event-details p {
+            margin: 5px 0;
+        }
+
+        .countdown {
+            font-size: 16px;
+            color: #4a6cf7;
+            margin-bottom: 15px;
+            font-weight: 500;
+            padding: 6px;
+            border: 1px solid #e1e7ff;
+            border-radius: 8px;
+            display: inline-block;
+            background-color: #f0f4ff;
+        }
+
+        form {
+            margin-top: 15px;
+        }
+
+        form input {
+            width: 100%;
+            padding: 10px;
+            margin: 8px 0;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.3s;
+            box-sizing: border-box;
+        }
+
+        form input:focus {
+            outline: none;
+            border-color: #4a6cf7;
+            box-shadow: 0 0 0 2px rgba(74, 108, 247, 0.1);
+        }
+
+        button {
+            background: #4a6cf7;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: background 0.2s ease;
+            margin-top: 5px;
+        }
+
+        button:hover {
+            background: #3a57e8;
+        }
+
+        /* Compact Animation */
+        .invitation-card {
+            opacity: 0;
+            transform: translateY(15px);
+            animation: slideUp 0.5s forwards;
+        }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Confirmation Message */
+        #confirmationMessage {
+            display: none;
+            background: #e2f5e9;
+            padding: 12px;
+            border-radius: 6px;
+            margin-top: 12px;
+            animation: fadeIn 0.3s forwards;
+            color: #2a9d8f;
+            font-size: 13px;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* Additional styling to prevent horizontal scrolling */
+        html,
+        body {
+            overflow-x: hidden;
+        }
+
+        /* Hide scrollbars while maintaining functionality */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+        
+        * {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+
+        /* Consolidated styles - removed redundant definitions */
+        .event-details,
+        .countdown,
+        #confirmationMessage {
+            max-width: 100%;
+            box-sizing: border-box;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="invitation-card">
+        <h1>🌟 You're Invited! 🌟</h1>
+        <div class="event-details">
+            <p><strong>Event:</strong> Tech Meetup 2025</p>
+            <p><strong>Date:</strong> July 25, 2025</p>
+            <p><strong>Time:</strong> 5:00 PM - 9:00 PM</p>
+            <p><strong>Location:</strong> Innovation Hub, Downtown</p>
+        </div>
+
+        <div class="countdown" id="countdown">Loading countdown...</div>
+
+        <form id="rsvpForm">
+            <input type="text" id="name" placeholder="Your Full Name" required>
+            <input type="email" id="email" placeholder="Your Email Address" required>
+            <button type="submit">Confirm RSVP</button>
+        </form>
+
+        <div id="confirmationMessage"></div>
+    </div>
+
+    <script>
+        // Countdown Timer
+        const targetDate = new Date('July 25, 2025 17:00:00').getTime();
+        const countdown = document.getElementById('countdown');
+
+        function updateTimer() {
+            const now = new Date().getTime();
+            const diff = targetDate - now;
+
+            if (diff <= 0) {
+                countdown.innerHTML = "🎉 The event is happening now!";
+                return;
+            }
+
+            const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+            const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+            countdown.innerHTML = `${days}d ${hours}h ${minutes}m ${seconds}s remaining`;
+        }
+
+        setInterval(updateTimer, 1000);
+        updateTimer();
+
+        // RSVP Form Handling
+        const form = document.getElementById('rsvpForm');
+        const confirmationMessage = document.getElementById('confirmationMessage');
+
+        form.addEventListener('submit', function (e) {
+            e.preventDefault();
+            const name = document.getElementById('name').value.trim();
+            const email = document.getElementById('email').value.trim();
+
+            if (name === '' || email === '') {
+                alert('Please fill in both your name and email.');
+                return;
+            }
+
+            // Show confirmation message on page instead of alert
+            confirmationMessage.innerHTML = `🎉 Thank you, ${name}! Your RSVP has been confirmed. We'll send details to ${email} soon.`;
+            confirmationMessage.style.display = 'block';
+
+            form.reset();
+
+            // Scroll to confirmation message if needed
+            confirmationMessage.scrollIntoView({ behavior: 'smooth' });
+        });
+    </script>
+
+</body>
+
+</html>
